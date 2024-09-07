@@ -22,7 +22,15 @@ class Auth:
 
     def authorization_header(self, request=None) -> str:
         """ header"""
-        return None
+        if request is None:
+            return None
+        if 'Authorization' not in request:
+            return None
+        else:
+          st = request.find("Authorization=")
+          ed = request.find('/')
+          val = [st + 12, ed]
+          return val
 
     def current_user(self, request=None) -> TypeVar('User'):
         """ current user"""
