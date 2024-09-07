@@ -24,13 +24,11 @@ class Auth:
         """ header"""
         if request is None:
             return None
-        if 'Authorization' not in request:
+        head = request.headers.get('Authorization')
+        if not head:
             return None
         else:
-          st = request.find("Authorization=")
-          ed = request.find('/')
-          val = [st + 12, ed]
-          return val
+            return head
 
     def current_user(self, request=None) -> TypeVar('User'):
         """ current user"""
