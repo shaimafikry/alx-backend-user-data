@@ -4,7 +4,7 @@
 from flask import jsonify, abort, request
 from api.v1.views import app_views
 from models.user import User
-import os
+from os import getenv
 
 
 @app_views.route('/auth_session/login',
@@ -12,32 +12,36 @@ import os
 def login() -> str:
     """ the session login
     """
-    user_email = request.form.get('email')
-    if not user_email:
+    email = request.form.get('email')
+
+    if not email:
         return jsonify({"error": "email missing"}), 400
 
-    user_password = request.form.get('password')
-    if not user_password:
+    password = request.form.get('password')
+
+    if not password:
         return jsonify({"error": "password missing"}), 400
 
-    # retur value is a list
-    user_list = User.search({'email': user_email})
-    if len(user) == 0:
+    try:
+        found_users = User.search({'email': email})
+    except Exception:
         return jsonify({"error": "no user found for this email"}), 404
 
-    for user in user_list:
-        # Validate password
-        if not user.is_valid_password(user_password):
+    if not found_users:
+        return jsonify({"error": "no user found for this email"}), 404
+
+    for user in found_users:
+        if not user.is_valid_password(password):
             return jsonify({"error": "wrong password"}), 401
 
-    # Create a new session for the user
     from api.v1.app import auth
-    user = user_list[0]
+
+    user = found_users[0]
     session_id = auth.create_session(user.id)
-    # Set the session cookie
-    user_json = user.to_json()
-    response = jsonify(user_json)
-    SESSION_NAME = os.getenv('SESSION_NAME')
+
+    SESSION_NAME = getenv("SESSION_NAME")
+
+    response = jsonify(user.to_json())
     response.set_cookie(SESSION_NAME, session_id)
 
     return response
