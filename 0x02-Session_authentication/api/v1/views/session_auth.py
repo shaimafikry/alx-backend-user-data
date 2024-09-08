@@ -27,14 +27,14 @@ def login() -> str:
     if not user or len(user) == 0:
         return jsonify({"error": "no user found for this email"}), 404
 
-    user = user_list[0]
-
-    # Validate password
-    if not user.is_valid_password(user_password):
-        return jsonify({"error": "wrong password"}), 401
+    for user in user_list:
+        # Validate password
+        if not user.is_valid_password(user_password):
+            return jsonify({"error": "wrong password"}), 401
 
     # Create a new session for the user
     from api.v1.app import auth
+    user = user_list[0]
     session_id = auth.create_session(user.id)
     if not session_id:
         return jsonify({"error": "could not create session"}), 500
