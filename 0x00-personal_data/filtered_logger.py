@@ -6,17 +6,20 @@ import mysql.connector
 from mysql.connector import MySQLConnection
 from typing import List, Tuple
 
+
 # Sensitive fields to redact from logs
 PII_FIELDS: Tuple[str, ...] = ("name", "email", "phone", "ssn", "password")
 
 
 class RedactingFormatter(logging.Formatter):
     """
-    Redacting Formatter class that filters sensitive information from log messages.
+    Redacting Formatter class that filters
+    sensitive information from log messages.
     """
     REDACTION: str = "***"
     FORMAT: str = ("name={name}; email={email}; phone={phone}; ssn={ssn}; "
-                   "password={password}; ip={ip}; last_login={last_login}; user_agent={user_agent};")
+                   "password={password}; ip={ip}; "
+                   "last_login={last_login}; user_agent={user_agent};")
     SEPARATOR: str = ";"
 
     def __init__(self, fields: List[str]):
@@ -28,10 +31,12 @@ class RedactingFormatter(logging.Formatter):
         Overridden format method to redact PII fields from the log message.
         """
         message = super(RedactingFormatter, self).format(record)
-        return self.filter_datum(self.fields, self.REDACTION, message, self.SEPARATOR)
+        return self.filter_datum(self.fields,
+                                 self.REDACTION, message, self.SEPARATOR)
 
 
-def filter_datum(fields: List[str], redaction: str, message: str, separator: str) -> str:
+def filter_datum(fields: List[str],
+                 redaction: str, message: str, separator: str) -> str:
     """
     Redacts sensitive information in a log message.
 
@@ -44,14 +49,17 @@ def filter_datum(fields: List[str], redaction: str, message: str, separator: str
     Returns:
     - The message with sensitive fields redacted.
     """
-    for field in fields:
-        message = re.sub(f"{field}=[^;]+", f"{field}={redaction}", message)
-    return message
+    pattern = r'(' + '|'.join([f"{field}=[^ {separator}]*"
+                               for field in fields]) + ')'
+
+    return re.sub(pattern, lambda m: f"{m.group().split('=')[0]}={redaction}",
+                  message)
 
 
 def get_logger() -> logging.Logger:
     """
-    Creates and configures a logger named 'user_data' with a stream handler 
+    Creates and configures a logger named 'user_data'
+    with a stream handler
     and a RedactingFormatter that filters sensitive fields.
 
     Returns:
@@ -65,14 +73,15 @@ def get_logger() -> logging.Logger:
     stream_handler = logging.StreamHandler()
     formatter = RedactingFormatter(fields=PII_FIELDS)
     stream_handler.setFormatter(formatter)
-    
+
     logger.addHandler(stream_handler)
     return logger
 
 
 def get_db() -> MySQLConnection:
     """
-    Connects to the MySQL database using credentials from environment variables.
+    Connects to the MySQL database using
+    credentials from environment variables.
 
     Returns:
     - A MySQLConnection object to interact with the database.
@@ -103,7 +112,8 @@ def main() -> None:
 
     # Retrieve data from the 'users' table
     cursor.execute(
-        "SELECT name, email, phone, ssn, password, ip, last_login, user_agent FROM users;"
+        "SELECT name, email, phone, ssn, password, ip, "
+        "last_login, user_agent FROM users;"
     )
 
     logger = get_logger()
