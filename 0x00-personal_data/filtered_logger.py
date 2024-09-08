@@ -30,23 +30,23 @@ class RedactingFormatter(logging.Formatter):
         message = super(RedactingFormatter, self).format(record)
         return self.filter_datum(self.fields, self.REDACTION, message, self.SEPARATOR)
 
-    @staticmethod
-    def filter_datum(fields: List[str], redaction: str, message: str, separator: str) -> str:
-        """
-        Redacts sensitive information in a log message.
 
-        Args:
-        - fields: List of fields to redact.
-        - redaction: The string to replace sensitive information with.
-        - message: The original log message.
-        - separator: Separator used between fields in the message.
+def filter_datum(fields: List[str], redaction: str, message: str, separator: str) -> str:
+    """
+    Redacts sensitive information in a log message.
 
-        Returns:
-        - The message with sensitive fields redacted.
-        """
-        for field in fields:
-            message = re.sub(f"{field}=[^;]+", f"{field}={redaction}", message)
-        return message
+    Args:
+    - fields: List of fields to redact.
+    - redaction: The string to replace sensitive information with.
+    - message: The original log message.
+    - separator: Separator used between fields in the message.
+
+    Returns:
+    - The message with sensitive fields redacted.
+    """
+    for field in fields:
+        message = re.sub(f"{field}=[^;]+", f"{field}={redaction}", message)
+    return message
 
 
 def get_logger() -> logging.Logger:
