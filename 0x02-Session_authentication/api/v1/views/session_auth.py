@@ -10,9 +10,7 @@ import os
 @app_views.route('/auth_session/login',
                  methods=['POST'], strict_slashes=False)
 def login() -> str:
-    """ GET /api/v1/status
-    Return:
-      - the status of the API
+    """ the session login
     """
     user_email = request.form.get('email')
     if not user_email:
@@ -24,7 +22,7 @@ def login() -> str:
 
     # retur value is a list
     user_list = User.search({'email': user_email})
-    if not user or len(user) == 0:
+    if len(user) == 0:
         return jsonify({"error": "no user found for this email"}), 404
 
     for user in user_list:
@@ -36,12 +34,10 @@ def login() -> str:
     from api.v1.app import auth
     user = user_list[0]
     session_id = auth.create_session(user.id)
-    if not session_id:
-        return jsonify({"error": "could not create session"}), 500
-
     # Set the session cookie
-    response = jsonify(user.to_json())
-    session_name = os.getenv('SESSION_NAME', '_my_session_id')
+    user_json = user.to_json()
+    response = jsonify(user_json)
+    session_name = os.getenv('SESSION_NAME')
     response.set_cookie(session_name, session_id)
 
     return response
