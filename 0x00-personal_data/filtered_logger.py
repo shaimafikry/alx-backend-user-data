@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+""" modle for filter logger"""
 import re
 import logging
 import os
@@ -122,7 +123,8 @@ def main() -> None:
     for row in cursor.fetchall():
         log_message = (
             f"name={row[0]}; email={row[1]}; phone={row[2]}; ssn={row[3]}; "
-            f"password={row[4]}; ip={row[5]}; last_login={row[6]}; user_agent={row[7]};"
+            f"password={row[4]}; ip={row[5]}; "
+            f"last_login={row[6]}; user_agent={row[7]};"
         )
         logger.info(log_message)
 
