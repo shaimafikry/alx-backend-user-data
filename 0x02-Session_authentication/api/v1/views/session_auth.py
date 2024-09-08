@@ -37,7 +37,7 @@ def login() -> str:
     # Set the session cookie
     user_json = user.to_json()
     response = jsonify(user_json)
-    session_name = os.getenv('SESSION_NAME')
-    response.set_cookie(session_name, session_id)
+    SESSION_NAME = os.getenv('SESSION_NAME')
+    response.set_cookie(SESSION_NAME, session_id)
 
     return response
